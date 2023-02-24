@@ -1,6 +1,6 @@
 import unittest
 from read_env_keys import read_key_from_env
-from theoddsapi.api import *
+from theoddsapi.api import theOddsAPI
 import sys
 
 
