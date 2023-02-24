@@ -1,5 +1,4 @@
 import requests
-from abc import abstractmethod
 import pandas as pd
 
 
@@ -8,18 +7,18 @@ class theOddsAPI(object):
     HOST = "https://api.the-odds-api.com"
 
     def _get(self, host, endpoint, params):
-        """[summary]
+        """Helper function for GET requests to The Odds API server
 
         Parameters
         ----------
-        host : [type]
+        host : str
             The host used by all requests
-        endpoint : [type]
-            A valid endpoint to make a request to. 
-            See https://the-odds-api.com/liveapi/guides/v4/ for a comprehensive 
+        endpoint : str
+            A valid endpoint to make a request to.
+            See https://the-odds-api.com/liveapi/guides/v4/ for a comprehensive
             list.
-        params : [type]
-            Valid parameters to pass as part of GET requests to various 
+        params : dict
+            Valid parameters to pass as part of GET requests to various
             endpoints. See https://app.swaggerhub.com/apis-docs/the-odds-api/odds-api/4
             for a comprehensive list.
         Returns
@@ -28,8 +27,10 @@ class theOddsAPI(object):
             Returns response from server if successful; otherwise, returns None
         """
         print(host+endpoint)
-
+        params['apiKey'] = self.api_key
+        print(params['apiKey'])
         response = requests.get(host + endpoint, params=params)
+
         if response.status_code != 200:
             print(
                 f'Failed to get {endpoint}: status_code {response.status_code}, response body {response.text}')
@@ -46,6 +47,24 @@ class theOddsAPI(object):
         print("sports response type: ", type(sports_response))
         return sports_response
 
+    def _get_usage_quota_helper(self):
+        """Helper function for getting requests used and requests remaining
+
+        Returns
+        -------
+        Response
+            response object from GET request to the /v4/sports endpoint which
+            does not affect the usage quota
+        """
+        # Make a request that does not affect the usage quota
+        params = dict()
+        endpoint = f"/v4/sports/"
+        response = self.get_sports({'apiKey': self.api_key})
+        params['apiKey'] = self.api_key
+        # Do NOT return the json of the response because we will need the headers
+        response = requests.get(theOddsAPI.HOST + endpoint, params=params)
+        return response
+
     def get_requests_remaining(self):
         """Get the number of requests remaining for current month
 
@@ -54,10 +73,8 @@ class theOddsAPI(object):
         int
             Number of requests remaining for current month
         """
-        # Make a request that does not affect the usage quota
-        response = self.get_sports({'apiKey': self.api_key})
-        # Access usage data from the response headers
-        return response.headers['x-requests-remaining']
+        usage_response = self._get_usage_quota_helper()
+        return int(usage_response.headers['x-requests-remaining'])
 
     def get_requests_used(self):
         """Get the number of requests used in current month
@@ -67,26 +84,40 @@ class theOddsAPI(object):
         int
             Number of requests used in current month
         """
-        # Make a request that does not affect the usage quota
-        response = self.get_sports({'apiKey': self.api_key})
-        # Access usage data from the response headers
-        return response.headers['x-requests-used']
+        usage_response = self._get_usage_quota_helper()
+        return int(usage_response.headers['x-requests-used'])
 
-    def get_odds(self, sport, params):
+    def get_odds(self, **kwargs):
         """Returns a list of upcoming and live games with recent odds for a
          given sport, region and market
 
         Parameters
         ----------
-        params : dict
-            See https://the-odds-api.com/liveapi/guides/v4/#parameters-2
+        sport : str
+            Sport key for which to return games and odds. Obtained from the
+            /sports endpoint
+        regions : str
+            Which bookmakers to appear in the response.
+        markets : str
+            The odds market to return.
+        eventId : str
+            Comma-separated game id(s) of upcoming or live game(s). Filters the
+            response to only return games for the specified game ids, provided
+            those games have not expired.
+        bookmakers : list[int]
+            The bookmaker(s) to be returned. Every group of 10 bookmakers
+            counts as 1 request.
         """
+        # Create the query parameters from the kwargs
+        params = kwargs
+        sport = params['sport']
+        del params['sport']
         endpoint = f'/v4/sports/{sport}/odds'
         odds_response = self._get(theOddsAPI.HOST, endpoint, params)
         return odds_response
 
-    def get_scores(self, sport, params):
-        """Returns a list of upcoming, live and recently completed games for a 
+    def get_scores(self, **kwargs):
+        """Returns a list of upcoming, live and recently completed games for a
         given sport. Live and recently completed games contain scores. Games
         from up to 3 days ago can be returned using the daysFrom parameter.
         Live scores update approximately every 30 seconds.
@@ -99,11 +130,16 @@ class theOddsAPI(object):
         params : dict
             See https://the-odds-api.com/liveapi/guides/v4/#parameters-3
         """
+        # Create the query parameters from the kwargs
+        params = kwargs
+        print(params)
+        sport = params['sport']
+        del params['sport']
         endpoint = f'/v4/sports/{sport}/scores/'
         scores_response = self._get(theOddsAPI.HOST, endpoint, params)
         return scores_response
 
-    def get_historical_odds(self, sport, params):
+    def get_historical_odds(self, **kwargs):
         """Returns a snapshot of games with bookmaker odds for a given sport, region
          and market, at a given historical date. Historical odds data is available
           from June 6th 2020, with snapshots taken at 10 minute intervals. From
@@ -114,33 +150,64 @@ class theOddsAPI(object):
         Parameters
         ----------
         sport : str
-            Sport key for which to return games and odds. Obtained from the 
+            Sport key for which to return games and odds. Obtained from the
             /sports endpoint
-        params : dict
-            See https://the-odds-api.com/liveapi/guides/v4/#parameters-4
+        regions : str
+            Which bookmakers to appear in the response.
+        markets : str
+            The odds market to return.
+        date : str
+            The timestamp of the data snapshot to be returned, specified in
+            ISO8601 format. Closest snapshot equal to or earlier than date
+            provided will be returned.
+        eventId : list[str]
+            Comma-separated game id(s) of upcoming or live game(s). Filters the
+            response to only return games for the specified game ids, provided
+            those games have not expired.
+        bookmakers : list[int]
+            The bookmaker(s) to be returned. Every group of 10 bookmakers
+            counts as 1 request.
         """
+        # Create the query parameters from the kwargs
+        params = kwargs
+        sport = params['sport']
+        del params['sport']
+        # Create the endpoint from the kwargs
         endpoint = f'/v4/sports/{sport}/odds-history/'
-        odds_history_response = self._get(
-            theOddsAPI.HOST, endpoint, params)
+
+        odds_history_response = self._get(theOddsAPI.HOST, endpoint, params)
         return odds_history_response
 
-    def get_event_odds(self, sport, event_id, params):
-        """Returns odds for a single game. Accepts any available betting markets 
-        using the markets parameter. To get available markets info, use 
+    def get_event_odds(self, **kwargs):
+        """Returns odds for a single game. Accepts any available betting markets
+        using the markets parameter. To get available markets info, use
         get_featured_betting_markets, get_additonal_markets, or get_player_props
         endpoint.
 
         Parameters
         ----------
         sport : str
-             Sport key for which to return games and odds. Obtained from the
-              /sports endpoint
-        event_id: str
-            The id of an upcoming or live game. Event ids can be found in the
-            "id" field in response of main /odds endpoint
-        params : dict
-            See https://the-odds-api.com/liveapi/guides/v4/#parameters-5
+            Sport key for which to return games and odds. Obtained from the
+            /sports endpoint
+        regions : str
+            Which bookmakers to appear in the response.
+        markets : str
+            The odds market to return.
+        eventId : str
+            Comma-separated game id(s) of upcoming or live game(s). Filters the
+            response to only return games for the specified game ids, provided
+            those games have not expired.
+        bookmakers : list[int]
+            The bookmaker(s) to be returned. Every group of 10 bookmakers
+            counts as 1 request.
         """
+        # Create the query parameters from the kwargs
+        params = kwargs
+        sport = params['sport']
+        event_id = params['eventId']
+        del params['sport']
+        del params['eventId']
+        # Create the endpoint from the kwargs
         endpoint = f'/v4/sports/{sport}/events/{event_id}/odds/'
         event_odds_response = self._get(
             theOddsAPI.HOST, endpoint, params)
@@ -205,7 +272,7 @@ class theOddsAPI(object):
     def get_player_props(cls, sport: str):
         """Get information on player props limited to US sports and selected US
         bookmakers, starting with FanDuel, DraftKings, Caesars, Bovada and more.
-        Player props update at 5 minute intervals. Player props need to be accessed 
+        Player props update at 5 minute intervals. Player props need to be accessed
         one event at a time using the /event/{eventId}/odds endpoint.
 
         Parameters
