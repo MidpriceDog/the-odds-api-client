@@ -12,7 +12,7 @@ class TestTheOddsAPI(unittest.TestCase):
 
     def _assert_json(self, response):
         # Deserialization of response gets a Python list or a dictionary.
-        print("Response: ", response)
+        # print("Response: ", response)
         assert isinstance(
             response, dict) or isinstance(response, list), f"list or dict expected, got: {type(response)}"
 
@@ -232,6 +232,10 @@ class TestGetUsageQuotas(TestTheOddsAPI):
 
 if __name__ == '__main__':
 
+    # Instantiate a client to get usage quota information after calls to tests
+    api_key = read_key_from_env('./api_key.env')
+    client = theOddsAPI(api_key)
+
     # TestGetSports suite
     sports_suite = unittest.TestSuite()
     sports_suite.addTest(
@@ -291,8 +295,12 @@ if __name__ == '__main__':
             runner.run(sysarg_to_suite_dict[arg_suite])
     # If none sys args are passed, run all test suites
     else:
-        runner.run(odds_suite)
-        runner.run(event_odds_suite)
-        runner.run(historical_odds_suite)
-        runner.run(usage_suite)
-        runner.run(scores_suite)
+        requests_used_dict = {}
+        # All Suites
+        for arg_suite in sysarg_to_suite_dict.keys():
+            requests_used_dict[arg_suite] = client.get_requests_used()
+            prev_requests_used = requests_used_dict[arg_suite]
+            runner.run(sysarg_to_suite_dict[arg_suite])
+            requests_used_dict[arg_suite] = client.get_requests_used()
+            print(f"{arg_suite} Diff: ",
+                  requests_used_dict[arg_suite] - prev_requests_used)
