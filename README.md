@@ -9,6 +9,29 @@ Run
 pip install -r requirements.txt
 ```
 
+## Example Usage
+
+Instantiate an instance of `theOddsAPI` by passing in an API key, which you 
+should receive via email upon signing up for a subscription plan [here](!https://the-odds-api.com/).
+
+```python
+client = theOddsAPI('YOUR_KEY_HERE')
+```
+
+Let's say you want to find out what the spread odds were on Fanduel's sportbook for games played on the 1st of January in the year 2023 around 12:00 UTC. Then, you would run the following:
+
+```python
+self._test_get_historical_odds(
+            sport='basketball_nba',
+            regions='us',
+            markets='spreads',
+            date='2023-01-01T12:00:00Z',
+            bookmakers='fanduel',
+            oddsFormat='american')
+```
+
+The documentation for all functions in the wrapper class specifies that dates needs to be supplied in either ISO or UNIX time format, and contains detailed information about other keyword arguments.
+
 ## Testing
 
 A test of this package can be done by running the following command
