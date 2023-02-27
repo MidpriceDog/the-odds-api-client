@@ -30,7 +30,10 @@ self._test_get_historical_odds(
             oddsFormat='american')
 ```
 
-The documentation for all functions in the wrapper class specifies that dates needs to be supplied in either ISO or UNIX time format, and contains detailed information about other keyword arguments.
+
+## Documentation
+
+You can find the documentation for the Odds API Client hosted [here](!https://midpricedog.github.io/the-odds-api-client/#header-classes).
 
 ## Testing
 
