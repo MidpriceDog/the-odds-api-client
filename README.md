@@ -33,7 +33,7 @@ self._test_get_historical_odds(
 
 ## Documentation
 
-You can find the documentation for the Odds API Client hosted [here](!https://midpricedog.github.io/the-odds-api-client/#header-classes).
+You can find the documentation for the Odds API Client hosted [here](https://midpricedog.github.io/the-odds-api-client/#header-classes).
 
 ## Testing
 
