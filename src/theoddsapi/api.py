@@ -32,7 +32,7 @@ class TheOddsAPI(object):
         """
         print(host+endpoint)
         params['apiKey'] = self.api_key
-        print(params['apiKey'])
+        print(params)
         response = requests.get(host + endpoint, params=params)
 
         if response.status_code != 200:
@@ -45,17 +45,16 @@ class TheOddsAPI(object):
     def __init__(self, api_key: str):
         self.api_key = api_key
 
-    def get_sports(self, all: bool):
+    def get_sports(self, all: str = 'false'):
         """Get list of available sports and tournaments
 
         Parameters
         ----------
         all : bool, optional
             When excluded, only recently updated (in-season) sports appear.
-            Include this paramter to see all available sports, by default True.
+            Include this paramter to see all available sports, by default false.
         """
         params = {
-            'apiKey': self.api_key,
             'all': all
         }
         endpoint = f"/v4/sports/"
@@ -141,13 +140,18 @@ class TheOddsAPI(object):
         ----------
         sport : str
             Sport key for which to return games and odds. See list of covered
-             sports at https://the-odds-api.com/sports-odds-data/sports-apis.html
-        params : dict
-            See https://the-odds-api.com/liveapi/guides/v4/#parameters-3
+            sports at https://the-odds-api.com/sports-odds-data/sports-apis.html
+        daysFrom : int
+            The number of days in the past from which to return completed games.
+            Valid values are integers from 1 to 3. If this field is missing,
+            only live and upcoming games are returned.
+        dateFormat : str
+            Determines the format of timestamps in the response. Valid values
+            are unix and iso (ISO 8601). By default, iso.
         """
-        # Create the query parameters from the kwargs
+        # params will have the key 'daysFrom' if it is supplied.
+        # Otherwise, empty dict.
         params = kwargs
-        print(params)
         sport = params['sport']
         del params['sport']
         endpoint = f'/v4/sports/{sport}/scores/'
@@ -175,13 +179,13 @@ class TheOddsAPI(object):
             The timestamp of the data snapshot to be returned, specified in
             ISO8601 format. Closest snapshot equal to or earlier than date
             provided will be returned.
-        eventId : list[str]
+        eventId : str
             Comma-separated game id(s) of upcoming or live game(s). Filters the
             response to only return games for the specified game ids, provided
             those games have not expired.
-        bookmakers : list[int]
-            The bookmaker(s) to be returned. Every group of 10 bookmakers
-            counts as 1 request.
+        bookmakers : str
+            Comma delimited list of bookmaker(s) to be returned. Every group of
+            10 bookmakers counts as 1 request.
         """
         # Create the query parameters from the kwargs
         params = kwargs
@@ -212,9 +216,9 @@ class TheOddsAPI(object):
             Comma-separated game id(s) of upcoming or live game(s). Filters the
             response to only return games for the specified game ids, provided
             those games have not expired.
-        bookmakers : list[int]
-            The bookmaker(s) to be returned. Every group of 10 bookmakers
-            counts as 1 request.
+        bookmakers : str
+            Comma delimited list of bookmaker(s) to be returned. Every group of
+            10 bookmakers counts as 1 request.
         """
         # Create the query parameters from the kwargs
         params = kwargs
@@ -355,3 +359,14 @@ class TheOddsAPI(object):
                 'player_points'
             ]
         return pd.DataFrame(player_props_dict)
+
+
+if __name__ == "__main__":
+    from read_env_keys import read_key_from_env
+    api_key = read_key_from_env('../../api_key.env')
+    print(api_key)
+    params = {
+        'apiKey': api_key}
+    client = TheOddsAPI(api_key)
+    response = client.get_sports()
+    print(response)
