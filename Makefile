@@ -18,6 +18,7 @@ help:
 	@echo "make test [args] - Run unit tests. Args is an optional space delimited list of one or more of the test suites: sports, odds, event_odds, historical_odds, scores, usage_quota. If no arguments are supplied, all test suites are run."
 	@echo "make install - Install necessary dependencies to use methods in the TheOddsAPI module. To be run after cloning git repo.
 	@echo "make clean - Remove any built artifacts and cached files"
+	@echo "make dist - Build .tar files"
 
 .PHONY: test
 test:
@@ -31,11 +32,13 @@ test:
 dist:
 	$(PYTHON) -m build
 
+# For ease of upload to TestPyPI
 .PHONY: testpypi
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install --upgrade twine
 	$(PYTHON) -m twine upload --repository testpypi dist/*
 
+# For ease of upload to PyPI
 .PHONY: pypi
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install --upgrade twine
