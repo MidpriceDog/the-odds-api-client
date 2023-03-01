@@ -45,10 +45,21 @@ class TheOddsAPI(object):
     def __init__(self, api_key: str):
         self.api_key = api_key
 
-    def get_sports(self, params):
+    def get_sports(self, all: bool):
+        """Get list of available sports and tournaments
+
+        Parameters
+        ----------
+        all : bool, optional
+            When excluded, only recently updated (in-season) sports appear.
+            Include this paramter to see all available sports, by default True.
+        """
+        params = {
+            'apiKey': self.api_key,
+            'all': all
+        }
         endpoint = f"/v4/sports/"
         sports_response = self._get(TheOddsAPI.HOST, endpoint, params)
-        print("sports response type: ", type(sports_response))
         return sports_response
 
     def _get_usage_quota_helper(self):
@@ -108,9 +119,9 @@ class TheOddsAPI(object):
             Comma-separated game id(s) of upcoming or live game(s). Filters the
             response to only return games for the specified game ids, provided
             those games have not expired.
-        bookmakers : list[int]
-            The bookmaker(s) to be returned. Every group of 10 bookmakers
-            counts as 1 request.
+        bookmakers : str
+            Comma delimited list of bookmaker(s) to be returned. Every group of
+            10 bookmakers counts as 1 request.
         """
         # Create the query parameters from the kwargs
         params = kwargs
