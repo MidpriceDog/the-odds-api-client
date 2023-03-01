@@ -2,7 +2,11 @@ import requests
 import pandas as pd
 
 
-class theOddsAPI(object):
+class TheOddsAPI(object):
+    """
+    This module provides functions to get historical snapshots of sports odds 
+    data back to 2020 as well as game scores and results for past and live games.
+    """
 
     HOST = "https://api.the-odds-api.com"
 
@@ -43,7 +47,7 @@ class theOddsAPI(object):
 
     def get_sports(self, params):
         endpoint = f"/v4/sports/"
-        sports_response = self._get(theOddsAPI.HOST, endpoint, params)
+        sports_response = self._get(TheOddsAPI.HOST, endpoint, params)
         print("sports response type: ", type(sports_response))
         return sports_response
 
@@ -62,7 +66,7 @@ class theOddsAPI(object):
         response = self.get_sports({'apiKey': self.api_key})
         params['apiKey'] = self.api_key
         # Do NOT return the json of the response because we will need the headers
-        response = requests.get(theOddsAPI.HOST + endpoint, params=params)
+        response = requests.get(TheOddsAPI.HOST + endpoint, params=params)
         return response
 
     def get_requests_remaining(self):
@@ -113,7 +117,7 @@ class theOddsAPI(object):
         sport = params['sport']
         del params['sport']
         endpoint = f'/v4/sports/{sport}/odds'
-        odds_response = self._get(theOddsAPI.HOST, endpoint, params)
+        odds_response = self._get(TheOddsAPI.HOST, endpoint, params)
         return odds_response
 
     def get_scores(self, **kwargs):
@@ -136,7 +140,7 @@ class theOddsAPI(object):
         sport = params['sport']
         del params['sport']
         endpoint = f'/v4/sports/{sport}/scores/'
-        scores_response = self._get(theOddsAPI.HOST, endpoint, params)
+        scores_response = self._get(TheOddsAPI.HOST, endpoint, params)
         return scores_response
 
     def get_historical_odds(self, **kwargs):
@@ -175,7 +179,7 @@ class theOddsAPI(object):
         # Create the endpoint from the kwargs
         endpoint = f'/v4/sports/{sport}/odds-history/'
 
-        odds_history_response = self._get(theOddsAPI.HOST, endpoint, params)
+        odds_history_response = self._get(TheOddsAPI.HOST, endpoint, params)
         return odds_history_response
 
     def get_event_odds(self, **kwargs):
@@ -210,7 +214,7 @@ class theOddsAPI(object):
         # Create the endpoint from the kwargs
         endpoint = f'/v4/sports/{sport}/events/{event_id}/odds/'
         event_odds_response = self._get(
-            theOddsAPI.HOST, endpoint, params)
+            TheOddsAPI.HOST, endpoint, params)
         return event_odds_response
 
     @classmethod
