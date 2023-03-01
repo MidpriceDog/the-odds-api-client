@@ -20,9 +20,7 @@ class TestTheOddsAPI(unittest.TestCase):
 class TestGetSports(TestTheOddsAPI):
 
     def test_get_sports(self):
-        params = {
-            'apiKey': self.api_key}
-        response = self.client.get_sports(params)
+        response = self.client.get_sports()
         self._assert_json(response)
 
 
@@ -31,22 +29,22 @@ class TestGetOdds(TestTheOddsAPI):
     def _test_get_odds(self, **kwargs):
         """Helper function to test get_odds
 
-           Parameters
-           ----------
-           sport : str
-               Sport key for which to return games and odds. Obtained from the
+            Parameters
+            ----------
+            sport : str
+                Sport key for which to return games and odds. Obtained from the
                 /sports endpoint
-           regions : str
-               Which bookmakers to appear in the response.
-           markets : str
-               The odds market to return.
-           eventId : str
+            regions : str
+                Which bookmakers to appear in the response.
+            markets : str
+                The odds market to return.
+            eventId : str
                 Comma-separated game id(s) of upcoming or live game(s). Filters the
                 response to only return games for the specified game ids, provided
                 those games have not expired.
-           bookmakers : list[int]
-               The bookmaker(s) to be returned. Every group of 10 bookmakers
-               counts as 1 request.
+            bookmakers : str
+                Comma delimited list of bookmaker(s) to be returned. Every group of
+                10 bookmakers counts as 1 request.
         """
         response = self.client.get_odds(**kwargs)
         self._assert_json(response)
@@ -88,25 +86,25 @@ class TestGetScores(TestTheOddsAPI):
         ----------
         sport : str
             Sport key for which to return games and odds
-
         days_from : str
             The number of days in the past from which to return completed games.
             Valid values are integers from 1 to 3. If this field is missing,
             only live and upcoming games are returned.
+        dateFormat : str
+            Determines the format of timestamps in the response. Valid values
+            are unix and iso (ISO 8601). By default, iso.
         """
-        params = kwargs
-        params['sport'] = kwargs['sport']
-        params['apiKey'] = self.api_key
         response = self.client.get_scores(**kwargs)
         self._assert_json(response)
 
     def test_get_scores(self):
         self._test_get_scores(sport='basketball_nba',
-                              daysFrom=3,
-                              dateFormat='iso')
+                              daysFrom=3)
         self._test_get_scores(sport='basketball_nba',
                               daysFrom=2,
                               dateFormat='iso')
+        self._test_get_scores(sport='basketball_nba',
+                              dateFormat='unix')
         self._test_get_scores(sport='basketball_nba')
         print('Successfully got scores...')
 
@@ -232,6 +230,7 @@ class TestGetUsageQuotas(TestTheOddsAPI):
         assert isinstance(requests_remaining, int)
         assert requests_remaining >= 0
         print('Successfully got requests remaining...')
+        print(f'{requests_remaining} requests remaining...')
 
     def test_get_requests_used(self):
         requests_used = self.client.get_requests_used()
@@ -239,6 +238,7 @@ class TestGetUsageQuotas(TestTheOddsAPI):
         assert isinstance(requests_used, int)
         assert requests_used >= 0
         print('Successfully got requests used...')
+        print(f'{requests_used} requests used...')
 
 
 if __name__ == '__main__':
@@ -306,12 +306,7 @@ if __name__ == '__main__':
             runner.run(sysarg_to_suite_dict[arg_suite])
     # If none sys args are passed, run all test suites
     else:
-        requests_used_dict = {}
         # All Suites
         for arg_suite in sysarg_to_suite_dict.keys():
-            requests_used_dict[arg_suite] = client.get_requests_used()
-            prev_requests_used = requests_used_dict[arg_suite]
+            prev_requests_used = client.get_requests_used()
             runner.run(sysarg_to_suite_dict[arg_suite])
-            requests_used_dict[arg_suite] = client.get_requests_used()
-            print(f"{arg_suite} Diff: ",
-                  requests_used_dict[arg_suite] - prev_requests_used)

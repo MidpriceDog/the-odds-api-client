@@ -359,14 +359,3 @@ class TheOddsAPI(object):
                 'player_points'
             ]
         return pd.DataFrame(player_props_dict)
-
-
-if __name__ == "__main__":
-    from read_env_keys import read_key_from_env
-    api_key = read_key_from_env('../../api_key.env')
-    print(api_key)
-    params = {
-        'apiKey': api_key}
-    client = TheOddsAPI(api_key)
-    response = client.get_sports()
-    print(response)
