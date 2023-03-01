@@ -34,12 +34,14 @@ dist:
 
 # For ease of upload to TestPyPI
 .PHONY: testpypi
+testpypi: 
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install --upgrade twine
 	$(PYTHON) -m twine upload --repository testpypi dist/*
 
 # For ease of upload to PyPI
 .PHONY: pypi
+pypi:
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install --upgrade twine
 	$(PYTHON) -m twine upload dist/*
