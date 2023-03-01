@@ -1,13 +1,13 @@
 import unittest
 from read_env_keys import read_key_from_env
-from theoddsapi.api import theOddsAPI
+from theoddsapi import TheOddsAPI
 import sys
 
 
 class TestTheOddsAPI(unittest.TestCase):
     def setUp(self):
         api_key = read_key_from_env('api_key.env')
-        self.client = theOddsAPI(api_key)
+        self.client = TheOddsAPI(api_key)
         self.api_key = api_key
 
     def _assert_json(self, response):
@@ -58,6 +58,7 @@ class TestGetOdds(TestTheOddsAPI):
             markets='h2h',
             bookmakers='fanduel',
             oddsFormat='american')
+        print('Successfully got head-to-head odds...')
 
     def test_get_odds_spreads(self):
         self._test_get_odds(
@@ -66,6 +67,7 @@ class TestGetOdds(TestTheOddsAPI):
             markets='spreads',
             bookmakers='fanduel',
             oddsFormat='american')
+        print('Successfully got spread odds...')
 
     def test_get_odds_totals(self):
         self._test_get_odds(
@@ -74,6 +76,7 @@ class TestGetOdds(TestTheOddsAPI):
             markets='totals',
             bookmakers='fanduel',
             oddsFormat='american')
+        print('Successfully got totals odds...')
 
 
 class TestGetScores(TestTheOddsAPI):
@@ -105,6 +108,7 @@ class TestGetScores(TestTheOddsAPI):
                               daysFrom=2,
                               dateFormat='iso')
         self._test_get_scores(sport='basketball_nba')
+        print('Successfully got scores...')
 
 
 class TestGetHistoricalOdds(TestTheOddsAPI):
@@ -152,6 +156,7 @@ class TestGetHistoricalOdds(TestTheOddsAPI):
             bookmakers='fanduel',
             oddsFormat='american',
             eventId='0363b83afb7b3532a0ee4682512d3c11')
+        print('Successfully got historical head-to-head odds...')
 
     def test_get_historical_odds_spreads(self):
         self._test_get_historical_odds(
@@ -161,6 +166,7 @@ class TestGetHistoricalOdds(TestTheOddsAPI):
             date='2023-01-01T12:00:00Z',
             bookmakers='fanduel',
             oddsFormat='american')
+        print('Successfully got historical spread odds...')
 
     def test_get_historical_odds_totals(self):
         self._test_get_historical_odds(
@@ -170,6 +176,7 @@ class TestGetHistoricalOdds(TestTheOddsAPI):
             date='2023-01-01T12:00:00Z',
             bookmakers='fanduel',
             oddsFormat='american')
+        print('Successfully got historical totals odds...')
 
 
 class TestGetEventOdds(TestTheOddsAPI):
@@ -214,6 +221,8 @@ class TestGetEventOdds(TestTheOddsAPI):
             markets='h2h',
             eventId=upcoming_eventId,
             bookmakers='fanduel')
+        print(
+            'Successfully got head-to-head event odds for event {upcoming_eventId}...')
 
 
 class TestGetUsageQuotas(TestTheOddsAPI):
@@ -222,19 +231,21 @@ class TestGetUsageQuotas(TestTheOddsAPI):
         requests_remaining = self.client.get_requests_remaining()
         assert isinstance(requests_remaining, int)
         assert requests_remaining >= 0
+        print('Successfully got requests remaining...')
 
     def test_get_requests_used(self):
         requests_used = self.client.get_requests_used()
         print(requests_used)
         assert isinstance(requests_used, int)
         assert requests_used >= 0
+        print('Successfully got requests used...')
 
 
 if __name__ == '__main__':
 
     # Instantiate a client to get usage quota information after calls to tests
     api_key = read_key_from_env('./api_key.env')
-    client = theOddsAPI(api_key)
+    client = TheOddsAPI(api_key)
 
     # TestGetSports suite
     sports_suite = unittest.TestSuite()
