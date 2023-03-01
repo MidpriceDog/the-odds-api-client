@@ -3,19 +3,31 @@ Python wrapper for The Odds API V4
 
 ## Getting Started
 
-Run
+You can install the package using
 
 ```
-pip install -r requirements.txt
+pip install theoddsapi
+```
+
+Or you can run the following to install from source
+
+```
+git clone https://github.com/bearburger/octopush-api-python.git
+```
+
+and then 
+
+```
+make install
 ```
 
 ## Example Usage
 
-Instantiate an instance of `theOddsAPI` by passing in an API key, which you 
+Instantiate an instance of `TheOddsAPI` by passing in an API key, which you 
 should receive via email upon signing up for a subscription plan [here](!https://the-odds-api.com/).
 
 ```python
-client = theOddsAPI('YOUR_KEY_HERE')
+client = TheOddsAPI('YOUR_KEY_HERE')
 ```
 
 Let's say you want to find out what the spread odds were on Fanduel's sportbook for games played on the 1st of January in the year 2023 around 12:00 UTC. Then, you would run the following:
@@ -33,20 +45,20 @@ self._test_get_historical_odds(
 
 ## Documentation
 
-You can find the documentation for the Odds API Client hosted [here](https://midpricedog.github.io/the-odds-api-client/#header-classes).
+Please refer to the documentation[here](https://midpricedog.github.io/the-odds-api-client/#header-classes) for information on how to use this package. 
 
 ## Testing
 
-A test of this package can be done by running the following command
+Run
 
 ```
-python tests/test.py
+make test
 ```
 
 <b>Note:</b> As a wrapper for The Odds API which requires the use of an API key,
 testing this package requires using part of your the request quota associated
-with the API key supplied. The usage quota for running the various tests suites
-in `tests.py` can be found in the schedule below. 
+with the API key supplied. The usage quotas for running the tests suites
+in the `test.py` file under the `tests` directory can be found in the schedule below. 
 
 | Test Suite | Usage Quota |
 | -------- | -------- |
