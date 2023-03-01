@@ -29,15 +29,17 @@ test:
 
 .PHONY: dist
 dist:
-	@echo "This command is properly indented with a tab character"
+	$(PYTHON) -m build
+
+.PHONY: pypi
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install --upgrade twine
-ifeq ($(ARG), t)
-	@echo "Executing make dist for TestPyPI..."
-endif
-	$(PYTHON) -m build
 	$(PYTHON) -m twine upload --repository testpypi dist/*
 
+.PHONY: testpypi
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install --upgrade twine
+	$(PYTHON) -m twine upload dist/*
 
 .PHONY: install
 install:

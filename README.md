@@ -9,10 +9,10 @@ You can install the package using
 pip install theoddsapi
 ```
 
-Or you can run the following to install from source
+Or you can run the following
 
 ```
-git clone https://github.com/bearburger/octopush-api-python.git
+git clone git@github.com:MidpriceDog/the-odds-api-client.git
 ```
 
 and then 
@@ -20,6 +20,8 @@ and then
 ```
 make install
 ```
+
+Either way, it is assumed you have Python 3, git, and pip installed.
 
 ## Example Usage
 
