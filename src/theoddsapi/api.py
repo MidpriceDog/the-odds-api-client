@@ -73,7 +73,7 @@ class TheOddsAPI(object):
         # Make a request that does not affect the usage quota
         params = dict()
         endpoint = f"/v4/sports/"
-        response = self.get_sports({'apiKey': self.api_key})
+        response = self.get_sports()
         params['apiKey'] = self.api_key
         # Do NOT return the json of the response because we will need the headers
         response = requests.get(TheOddsAPI.HOST + endpoint, params=params)
