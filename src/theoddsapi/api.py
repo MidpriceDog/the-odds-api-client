@@ -1,5 +1,7 @@
 import requests
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 
 class TheOddsAPI(object):
@@ -9,6 +11,9 @@ class TheOddsAPI(object):
     """
 
     HOST = "https://api.the-odds-api.com"
+    # List of bookmaker regions to scrape from the-odds-api.com
+    # NOTE: Index of bookmaker regions reflects the index of the table on the website to scrape
+    BOOKMAKER_REGIONS = ['all', 'us', 'uk', 'eu', 'au']
 
     def _get(self, host, endpoint, params):
         """Helper function for GET requests to The Odds API server
@@ -232,8 +237,8 @@ class TheOddsAPI(object):
             TheOddsAPI.HOST, endpoint, params)
         return event_odds_response
 
-    @classmethod
-    def get_featured_betting_markets(cls):
+    @staticmethod
+    def get_featured_betting_markets():
         """Get the most common markets that are featured by bookmakers.
         Terminology for betting markets can vary by country, sport and even
         amongst bookmakers.
@@ -260,8 +265,8 @@ class TheOddsAPI(object):
         }
         return pd.DataFrame(featured_betting_markets_dict)
 
-    @classmethod
-    def get_additional_markets(cls):
+    @staticmethod
+    def get_additional_markets():
         """Get information on additional markets limited to US sports and selected
         bookmakers. Additional markets update at 5 minute intervals.
         Additional markets need to be accessed one event at a time using the
@@ -287,8 +292,8 @@ class TheOddsAPI(object):
         }
         return pd.DataFrame(additional_markets_dict)
 
-    @classmethod
-    def get_player_props(cls, sport: str):
+    @staticmethod
+    def get_player_props(sport: str):
         """Get information on player props limited to US sports and selected US
         bookmakers, starting with FanDuel, DraftKings, Caesars, Bovada and more.
         Player props update at 5 minute intervals. Player props need to be accessed
@@ -359,3 +364,78 @@ class TheOddsAPI(object):
                 'player_points'
             ]
         return pd.DataFrame(player_props_dict)
+    import requests
+
+    @staticmethod
+    def _get_bookmakers_helper(region_index: int):
+        """Helper function to get a list of bookmakers and their keys from the-odds-api.com website for a given region by index.
+
+        Parameters
+        ----------
+        region_index : int
+            Index of the region which reflects the ordering of regions on the website
+
+        Returns
+        -------
+        bookmakers : list[dict]
+            list of bookmakers and their keys for the a region
+        """
+        url = "https://the-odds-api.com/sports-odds-data/bookmaker-apis.html"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        bookmakers = []
+
+        # Find the list of bookmakers
+        bookmakers_section = soup.find_all('table')
+        region_table = bookmakers_section[region_index]
+        rows = region_table.find_all('tr')
+
+        for row in rows:
+            tds = row.find_all('td')
+            d = dict()
+            for i, td in enumerate(tds):
+                if td.text.strip() != '':
+                    if i == 0:
+                        d['region'] = td.text.strip()
+                    elif i == 1:
+                        d['key'] = td.text.strip()
+                    elif i == 2:
+                        # Bookmaker name is the first element of the split list
+                        d['title'] = td.text.strip().split('\n')[0]
+            # Append the dictionary to the list of bookmakers if it is not empty
+            if d != {}:
+                bookmakers.append(d)
+        return bookmakers
+
+    @classmethod
+    def get_bookmakers(cls, region: str = 'all'):
+        """Get a list of bookmakers and their keys from the-odds-api.com website for a given region (or all regions if no region is specified).
+
+        Parameters
+        ----------
+        region : str, optional
+            region to get all bookmakers for, by default 'all', options are 'all', 'us', 'uk', 'au', 'eu'
+
+        Returns
+        -------
+        bookmakers_all : list[dict]
+            list of bookmakers and their keys for the given region
+        """
+
+        if region == 'all':
+            for i in range(len(TheOddsAPI.bookmaker_regions)-1):
+                bookmakers = TheOddsAPI._get_bookmakers_helper(i)
+                if i == 0:
+                    bookmakers_all = bookmakers
+                else:
+                    bookmakers_all.extend(bookmakers)
+        else:
+            if region not in TheOddsAPI.bookmaker_regions:
+                raise ValueError(
+                    f'Invalid region: {region}. Valid regions are: {TheOddsAPI.bookmaker_regions}')
+            else:
+                bookmaker_index = TheOddsAPI.bookmaker_regions.index(
+                    region) - 1
+                bookmakers_all = TheOddsAPI._get_bookmakers_helper(
+                    bookmaker_index)
+        return bookmakers_all
