@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-import requests
 from bs4 import BeautifulSoup
 
 
@@ -423,18 +422,18 @@ class TheOddsAPI(object):
         """
 
         if region == 'all':
-            for i in range(len(TheOddsAPI.bookmaker_regions)-1):
+            for i in range(len(TheOddsAPI.BOOKMAKER_REGIONS)-1):
                 bookmakers = TheOddsAPI._get_bookmakers_helper(i)
                 if i == 0:
                     bookmakers_all = bookmakers
                 else:
                     bookmakers_all.extend(bookmakers)
         else:
-            if region not in TheOddsAPI.bookmaker_regions:
+            if region not in TheOddsAPI.BOOKMAKER_REGIONS:
                 raise ValueError(
-                    f'Invalid region: {region}. Valid regions are: {TheOddsAPI.bookmaker_regions}')
+                    f'Invalid region: {region}. Valid regions are: {TheOddsAPI.BOOKMAKER_REGIONS}')
             else:
-                bookmaker_index = TheOddsAPI.bookmaker_regions.index(
+                bookmaker_index = TheOddsAPI.BOOKMAKER_REGIONS.index(
                     region) - 1
                 bookmakers_all = TheOddsAPI._get_bookmakers_helper(
                     bookmaker_index)
