@@ -34,9 +34,9 @@ class TheOddsAPI(object):
         dict or None
             Returns response from server if successful; otherwise, returns None
         """
-        print(host+endpoint)
+
         params['apiKey'] = self.api_key
-        print(params)
+
         response = requests.get(host + endpoint, params=params)
 
         if response.status_code != 200:
