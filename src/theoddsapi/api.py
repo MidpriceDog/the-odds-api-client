@@ -31,20 +31,19 @@ class TheOddsAPI(object):
             for a comprehensive list.
         Returns
         -------
-        dict or None
-            Returns response from server if successful; otherwise, returns None
+        dict
+            Returns response from server if successful; otherwise, raises an exception
         """
 
         params['apiKey'] = self.api_key
 
-        response = requests.get(host + endpoint, params=params)
-
-        if response.status_code != 200:
-            print(
-                f'Failed to get {endpoint}: status_code {response.status_code}, response body {response.text}')
-            return None
-        else:
+        # Decode the response and throw an exception for HTTP codes 400-599
+        try:
+            response = requests.get(host + endpoint, params=params)
+            response.raise_for_status()
             return response.json()
+        except requests.exceptions.HTTPError as e:
+            raise e
 
     def __init__(self, api_key: str):
         self.api_key = api_key
@@ -438,3 +437,11 @@ class TheOddsAPI(object):
                 bookmakers_all = TheOddsAPI._get_bookmakers_helper(
                     bookmaker_index)
         return bookmakers_all
+
+
+# Write if __name__ == '__main__' here
+if __name__ == '__main__':
+    # Make a call to the API by instantiating the class and then running get_odds()
+
+    odds_client = TheOddsAPI('6e70363e49e52bd9450563ecbbf500b3')
+    odds_client.get_odds()
