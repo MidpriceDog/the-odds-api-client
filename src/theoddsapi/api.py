@@ -437,11 +437,3 @@ class TheOddsAPI(object):
                 bookmakers_all = TheOddsAPI._get_bookmakers_helper(
                     bookmaker_index)
         return bookmakers_all
-
-
-# Write if __name__ == '__main__' here
-if __name__ == '__main__':
-    # Make a call to the API by instantiating the class and then running get_odds()
-
-    odds_client = TheOddsAPI('6e70363e49e52bd9450563ecbbf500b3')
-    odds_client.get_odds()
