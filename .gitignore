@@ -135,3 +135,4 @@ dmypy.json
 
 # virtual environments
 venv/
+api_key.env

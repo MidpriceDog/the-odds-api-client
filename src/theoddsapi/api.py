@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
+import logging
+
+# logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 class TheOddsAPI(object):
@@ -39,7 +42,8 @@ class TheOddsAPI(object):
 
         # Decode the response and throw an exception for HTTP codes 400-599
         try:
-            response = requests.get(host + endpoint, params=params)
+            response = requests.get(
+                host + endpoint, params=params)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as e:
@@ -437,3 +441,9 @@ class TheOddsAPI(object):
                 bookmakers_all = TheOddsAPI._get_bookmakers_helper(
                     bookmaker_index)
         return bookmakers_all
+
+
+if __name__ == "__main__":
+    client = TheOddsAPI(api_key='83b11a6871df587f7b3a79fd80309959')
+    print(client.get_odds(sport='basketball_nba', regions='us',
+                          markets='h2h', oddsFormat='american'))
